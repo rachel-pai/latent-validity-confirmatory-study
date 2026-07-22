@@ -6,7 +6,7 @@
 
   <section id="setup" class="card">
     <h1>When may an assistant use something it remembers?</h1>
-    <p>You will read 12 short situations. For each one, judge whether a highlighted remembered detail may be used in the reply. The pilot normally takes 12–18 minutes.</p>
+    <p>You will read 24 short situations. For each one, judge whether a highlighted remembered detail may be used in the reply. The pilot normally takes 25–35 minutes.</p>
     <div class="notice"><strong>Privacy:</strong> your Prolific ID is used only to prevent duplicate submissions and process study participation. Do not enter your name, email, or other personal information in rationales.</div>
     <h3>Participant ID</h3><input id="participantId" type="text" autocomplete="off" placeholder="Loaded automatically from Prolific">
     <p class="consent"><input id="consent" type="checkbox"><label for="consent">I am at least 18, have read the study information, and consent to participate. I understand that I may stop before submitting.</label></p>
@@ -57,7 +57,7 @@
     </article>
   </section>
 
-  <section id="done" class="card hidden"><h1>Thank you</h1><p>Your 12 pilot responses were saved.</p><p id="doneError" class="error"></p></section>
+  <section id="done" class="card hidden"><h1>Thank you</h1><p>Your 24 pilot responses were saved.</p><p id="doneError" class="error"></p></section>
   <p class="footer">Study data are saved securely under an isolated study identifier.</p>
 </main>
 
@@ -70,7 +70,7 @@ import {firebaseConfig,studyConfig} from './firebase-config.js';
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search),prolificId=params.get('PROLIFIC_PID')||'',studyIdParam=params.get('STUDY_ID')||'',sessionId=params.get('SESSION_ID')||'';
 const pilotCompletionCode=params.get('cc')||'';
-const PILOT_STUDY_ID='lv-confirmatory-cognitive-pilot-20260722',PILOT_ITEMS=12;
+const PILOT_STUDY_ID='lv-confirmatory-cognitive-pilot-20260722',PILOT_ITEMS=24;
 $('participantId').value=prolificId; let user,tasks=[],answers={},index=0,itemStarted=0,slotId='';
 const ACTIONS={yes:'Yes, it may be used',no:'No, it should not be used',unresolved:'The visible information does not determine this'};
 const MEMORIES={current:'Current',historical:'No longer current',unresolved:'Cannot tell'};
