@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function studyParticipant(studyId) {
+      return get(/databases/$(database)/documents/studies/$(studyId)/participants/$(request.auth.uid));
+    }
+
+    match /studies/lv-confirmatory-v1-20260722 {
+      allow read: if signedIn();
+      allow write: if false;
+
+      match /slots/{slotId} {
+        // An unclaimed slot may be discovered. A claimed slot is visible only
+        // to its owner, preventing participants from enumerating assignments.
+        allow get, list: if signedIn() &&
+          (!resource.data.claimed || resource.data.ownerUid == request.auth.uid);
+        allow update: if signedIn()
+          && !resource.data.claimed
+          && request.resource.data.claimed == true
+          && request.resource.data.ownerUid == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['claimed', 'ownerUid', 'claimedAt']);
+        allow create, delete: if false;
+
+        match /tasks/{taskId} {
+          allow read: if signedIn()
+            && studyParticipant('lv-confirmatory-v1-20260722').data.slotId == slotId;
+          allow write: if false;
+        }
+      }
+
+      match /participants/{uid} {
+        allow create: if signedIn() && request.auth.uid == uid
+          && request.resource.data.uid == uid;
+        allow read, update: if signedIn() && request.auth.uid == uid
+          && request.resource.data.uid == uid;
+        allow delete: if false;
+
+        match /responses/{taskId} {
+          allow read, create, update: if signedIn() && request.auth.uid == uid
+            && request.resource.data.uid == uid
+            && request.resource.data.taskId == taskId
+            && request.resource.data.studyId == 'lv-confirmatory-v1-20260722';
+          allow delete: if false;
+        }
+      }
+    }
+  }
+}

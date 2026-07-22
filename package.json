@@ -1,0 +1,13 @@
+{
+  "name": "latent-validity-confirmatory-study",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "seed": "node scripts/seed-firestore.mjs",
+    "export": "node scripts/export-responses.mjs",
+    "serve": "python3 -m http.server 8765"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.4.0"
+  }
+}
