@@ -38,7 +38,8 @@ service cloud.firestore {
         allow delete: if false;
 
         match /responses/{taskId} {
-          allow read, create, update: if signedIn() && request.auth.uid == uid
+          allow read: if signedIn() && request.auth.uid == uid;
+          allow create, update: if signedIn() && request.auth.uid == uid
             && request.resource.data.uid == uid
             && request.resource.data.taskId == taskId
             && request.resource.data.studyId == 'lv-confirmatory-v1-20260722';
