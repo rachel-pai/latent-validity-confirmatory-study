@@ -4,7 +4,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const here=path.dirname(fileURLToPath(import.meta.url)),root=path.resolve(here,'..');
-const studyId='lv-confirmatory-v1-20260722';
+const studyId='lv-confirmatory-formal-v4-20260722';
 if(!process.env.GOOGLE_APPLICATION_CREDENTIALS)throw new Error('Set GOOGLE_APPLICATION_CREDENTIALS to a local service-account JSON path. Never commit that file.');
 admin.initializeApp({credential:admin.credential.applicationDefault(),projectId:'agentmemory-7e124'});
 const db=admin.firestore();
@@ -19,8 +19,8 @@ async function flush(){if(!ops.length)return;const batch=db.batch();for(const [r
 function put(ref,data){ops.push([ref,data]);if(ops.length>=batchSize)return flush()}
 
 const studyRef=db.collection('studies').doc(studyId);
-await put(studyRef,{studyId,interfaceVersion:'lv-confirmatory-github-pages-v1',status:'SEEDED_NOT_OPEN',slots:48,itemsPerSlot:24,createdAt:admin.firestore.FieldValue.serverTimestamp()});
-for(let n=1;n<=48;n++){
+await put(studyRef,{studyId,interfaceVersion:'lv-confirmatory-formal-v4',status:'SEEDED_NOT_OPEN',slots:24,itemsPerSlot:24,createdAt:admin.firestore.FieldValue.serverTimestamp()});
+for(let n=1;n<=24;n++){
   const slotId=`RATER_SLOT_${String(n).padStart(2,'0')}`,slotRef=studyRef.collection('slots').doc(slotId);
   await put(slotRef,{slotId,claimed:false,ownerUid:null,createdAt:admin.firestore.FieldValue.serverTimestamp()});
   const seedDir=process.env.LV_TASKS_DIR||path.join(root,'seed_input');
@@ -29,4 +29,4 @@ for(let n=1;n<=48;n++){
   if(rows.length!==24)throw new Error(`${slotId}: expected 24 tasks, found ${rows.length}`);
   for(const [displayOrder,r] of rows.entries())await put(slotRef.collection('tasks').doc(r.task_id),{taskId:r.task_id,title:r.title,request:r.request,relevantHistory:r.relevant_history,decisionContext:r.decision_context,storedNoteA:r.stored_note_a,storedNoteB:r.stored_note_b,displayOrder});
 }
-await flush();console.log(`Seeded ${studyId}: 48 slots x 24 blind tasks. No pair or outcome metadata uploaded.`);
+await flush();console.log(`Seeded ${studyId}: 24 slots x 24 blind tasks. No pair or outcome metadata uploaded.`);

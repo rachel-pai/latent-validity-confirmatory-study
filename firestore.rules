@@ -5,17 +5,21 @@ service cloud.firestore {
     function studyParticipant(studyId) {
       return get(/databases/$(database)/documents/studies/$(studyId)/participants/$(request.auth.uid));
     }
+    function formalStudy(studyId) {
+      return studyId == 'lv-confirmatory-v1-20260722'
+        || studyId == 'lv-confirmatory-formal-v4-20260722';
+    }
 
-    match /studies/lv-confirmatory-v1-20260722 {
-      allow read: if signedIn();
+    match /studies/{formalStudyId} {
+      allow read: if signedIn() && formalStudy(formalStudyId);
       allow write: if false;
 
       match /slots/{slotId} {
         // An unclaimed slot may be discovered. A claimed slot is visible only
         // to its owner, preventing participants from enumerating assignments.
-        allow get, list: if signedIn() &&
+        allow get, list: if formalStudy(formalStudyId) && signedIn() &&
           (!resource.data.claimed || resource.data.ownerUid == request.auth.uid);
-        allow update: if signedIn()
+        allow update: if formalStudy(formalStudyId) && signedIn()
           && !resource.data.claimed
           && request.resource.data.claimed == true
           && request.resource.data.ownerUid == request.auth.uid
@@ -24,26 +28,26 @@ service cloud.firestore {
         allow create, delete: if false;
 
         match /tasks/{taskId} {
-          allow read: if signedIn()
-            && studyParticipant('lv-confirmatory-v1-20260722').data.slotId == slotId;
+          allow read: if formalStudy(formalStudyId) && signedIn()
+            && studyParticipant(formalStudyId).data.slotId == slotId;
           allow write: if false;
         }
       }
 
       match /participants/{uid} {
-        allow create: if signedIn() && request.auth.uid == uid
+        allow create: if formalStudy(formalStudyId) && signedIn() && request.auth.uid == uid
           && request.resource.data.uid == uid;
-        allow read: if signedIn() && request.auth.uid == uid;
-        allow update: if signedIn() && request.auth.uid == uid
+        allow read: if formalStudy(formalStudyId) && signedIn() && request.auth.uid == uid;
+        allow update: if formalStudy(formalStudyId) && signedIn() && request.auth.uid == uid
           && request.resource.data.uid == uid;
         allow delete: if false;
 
         match /responses/{taskId} {
-          allow read: if signedIn() && request.auth.uid == uid;
-          allow create, update: if signedIn() && request.auth.uid == uid
+          allow read: if formalStudy(formalStudyId) && signedIn() && request.auth.uid == uid;
+          allow create, update: if formalStudy(formalStudyId) && signedIn() && request.auth.uid == uid
             && request.resource.data.uid == uid
             && request.resource.data.taskId == taskId
-            && request.resource.data.studyId == 'lv-confirmatory-v1-20260722';
+            && request.resource.data.studyId == formalStudyId;
           allow delete: if false;
         }
       }

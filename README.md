@@ -1,7 +1,7 @@
 # GitHub Pages + Firebase + Prolific deployment
 
 This static study reads PROLIFIC_PID, STUDY_ID and SESSION_ID from the URL,
-signs the participant into Firebase anonymously, atomically claims one of 48
+signs the participant into Firebase anonymously, atomically claims one of 24
 server-seeded assignments, saves 24 responses, and redirects to Prolific.
 
 ## Researcher steps
@@ -9,12 +9,12 @@ server-seeded assignments, saves 24 responses, and redirects to Prolific.
 1. In Firebase Authentication enable Anonymous sign-in and create Firestore.
 2. Merge firestore.rules into the existing project rules; do not overwrite
    rules for other studies.
-3. Put the 48 frozen assignment CSVs in ignored seed_input/.
+3. Put the 24 frozen assignment CSVs in ignored seed_input/.
    Build them from a private 144-row master with:
    python3 scripts/build_assignments.py MASTER.csv --output seed_input
    The script requires 12 two-sided pairs for each of requester, purpose,
    revision, lifecycle, provenance and reference, and fails unless every item
-   receives eight judgments with zero within-participant pair overlap.
+   receives four judgments with zero within-participant pair overlap.
 4. Set GOOGLE_APPLICATION_CREDENTIALS to an Admin service account stored
    outside this repository, run npm install and npm run seed once.
 5. Replace the completion code in firebase-config.js.
@@ -24,10 +24,10 @@ server-seeded assignments, saves 24 responses, and redirects to Prolific.
 
    https://OWNER.github.io/REPO/?PROLIFIC_PID={{%PROLIFIC_PID%}}&STUDY_ID={{%STUDY_ID%}}&SESSION_ID={{%SESSION_ID%}}
 
-The budgeted target is 48 usable participants in total. Recruit the first 5 as
-a staged pilot under the frozen v3 protocol. If the preregistered quality gate
+The formal-v4 target is 24 usable participants. Recruit the first 5 as a staged
+wave under the frozen formal-v4 protocol. If the preregistered quality gate
 passes and no construct-relevant wording, scoring, exclusion, or interface
-change is made after inspecting them, retain those 5 and recruit 43 more under
-the same v3 protocol. Otherwise treat the first 5 as pilot-only, issue a new
-version, and recruit 48 usable participants for that version. Never combine
-responses across stimulus versions merely to reach the target.
+change is made after inspecting them, retain those 5 and recruit 19 more.
+Otherwise treat the first 5 as pilot-only, issue a new version, and recruit 24
+usable participants for that version. Never combine stimulus versions merely
+to reach the target.

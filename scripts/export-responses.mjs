@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import fs from 'node:fs';
-const studyId='lv-confirmatory-v1-20260722';
+const studyId='lv-confirmatory-formal-v4-20260722';
 if(!process.env.GOOGLE_APPLICATION_CREDENTIALS)throw new Error('Set GOOGLE_APPLICATION_CREDENTIALS to the local service-account JSON path.');
 admin.initializeApp({credential:admin.credential.applicationDefault(),projectId:'agentmemory-7e124'});const db=admin.firestore();
 const out=[];const participants=await db.collection('studies').doc(studyId).collection('participants').get();
