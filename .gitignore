@@ -1,5 +1,6 @@
 node_modules/
 seed_input/
+private_master_stimuli.csv
 exports/
 .firebaserc
 *service-account*.json
