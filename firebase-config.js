@@ -9,6 +9,6 @@ export const firebaseConfig = {
 export const studyConfig = {
   studyId: "lv-confirmatory-v1-20260722",
   interfaceVersion: "lv-confirmatory-github-pages-v1",
-  completionCode: "REPLACE_WITH_PROLIFIC_COMPLETION_CODE",
+  completionCode: "CA6ZA34N",
   expectedItems: 24
 };
