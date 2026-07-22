@@ -1,6 +1,6 @@
-# Pilot v2 stimulus audit
+# Pilot v3 stimulus audit
 
-Frozen candidate: `lv-confirmatory-cognitive-pilot-v2-20260722`
+Frozen candidate: `lv-confirmatory-cognitive-pilot-v3-20260722`
 
 ## Design checks
 
@@ -11,7 +11,7 @@ Frozen candidate: `lv-confirmatory-cognitive-pilot-v2-20260722`
 - Each case supplies concrete evidence needed for the intended judgment.
 - Authorization, revision, source, and reference evidence is expressed through ordinary records and roles rather than abstract construction metadata.
 - Public stimuli contain no `factor`, `condition`, `pair_id`, or expected-answer fields.
-- The private analysis key is stored outside this public site repository at `../pilot-v2-private-key.csv` and is never loaded by the participant page.
+- The private analysis key is stored outside this public site repository and is never loaded by the participant page.
 
 ## Interpretation safeguards
 

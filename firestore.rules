@@ -53,7 +53,8 @@ service cloud.firestore {
       allow read: if signedIn()
         && pilotStudyId in [
           'lv-confirmatory-cognitive-pilot-20260722',
-          'lv-confirmatory-cognitive-pilot-v2-20260722'
+          'lv-confirmatory-cognitive-pilot-v2-20260722',
+          'lv-confirmatory-cognitive-pilot-v3-20260722'
         ];
       allow write: if false;
 
@@ -64,7 +65,8 @@ service cloud.firestore {
           && request.resource.data.studyId == pilotStudyId
           && pilotStudyId in [
             'lv-confirmatory-cognitive-pilot-20260722',
-            'lv-confirmatory-cognitive-pilot-v2-20260722'
+            'lv-confirmatory-cognitive-pilot-v2-20260722',
+            'lv-confirmatory-cognitive-pilot-v3-20260722'
           ];
         allow read: if signedIn() && request.auth.uid == uid;
         allow update: if signedIn()
@@ -73,7 +75,8 @@ service cloud.firestore {
           && request.resource.data.studyId == pilotStudyId
           && pilotStudyId in [
             'lv-confirmatory-cognitive-pilot-20260722',
-            'lv-confirmatory-cognitive-pilot-v2-20260722'
+            'lv-confirmatory-cognitive-pilot-v2-20260722',
+            'lv-confirmatory-cognitive-pilot-v3-20260722'
           ];
         allow delete: if false;
 
@@ -86,7 +89,8 @@ service cloud.firestore {
             && request.resource.data.studyId == pilotStudyId
             && pilotStudyId in [
               'lv-confirmatory-cognitive-pilot-20260722',
-              'lv-confirmatory-cognitive-pilot-v2-20260722'
+              'lv-confirmatory-cognitive-pilot-v2-20260722',
+              'lv-confirmatory-cognitive-pilot-v3-20260722'
             ];
           allow delete: if false;
         }

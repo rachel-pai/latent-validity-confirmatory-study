@@ -2,7 +2,7 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Memory Decision Study</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="study-layout.css"></head>
 <body><main class="wrap">
-  <div class="top"><div class="brand">Memory Decision Study — Cognitive Pilot</div><div class="pill" id="statusPill">Pilot v2</div></div>
+  <div class="top"><div class="brand">Memory Decision Study — Cognitive Pilot</div><div class="pill" id="statusPill">Pilot v3</div></div>
 
   <section id="setup" class="card">
     <h1>When may an assistant use something it remembers?</h1>
@@ -70,7 +70,7 @@ import {firebaseConfig,studyConfig} from './firebase-config.js';
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
 const params=new URLSearchParams(location.search),prolificId=params.get('PROLIFIC_PID')||'',studyIdParam=params.get('STUDY_ID')||'',sessionId=params.get('SESSION_ID')||'';
 const pilotCompletionCode=params.get('cc')||'';
-const PILOT_STUDY_ID='lv-confirmatory-cognitive-pilot-v2-20260722',PILOT_INTERFACE_VERSION='lv-cognitive-pilot-v2',PILOT_ITEMS=24;
+const PILOT_STUDY_ID='lv-confirmatory-cognitive-pilot-v3-20260722',PILOT_INTERFACE_VERSION='lv-cognitive-pilot-v3',PILOT_ITEMS=24;
 $('participantId').value=prolificId; let user,tasks=[],answers={},index=0,itemStarted=0,slotId='';
 const ACTIONS={yes:'Yes, it may be used',no:'No, it should not be used',unresolved:'The visible information does not determine this'};
 const MEMORIES={current:'Current',historical:'No longer current',unresolved:'Cannot tell'};
@@ -95,7 +95,7 @@ async function claimSlot(){
   await setDoc(pref,{uid:user.uid,slotId,prolificId:$('participantId').value.trim(),prolificStudyId:studyIdParam,prolificSessionId:sessionId,studyId:PILOT_STUDY_ID,interfaceVersion:PILOT_INTERFACE_VERSION,consented:true,consentedAt:serverTimestamp(),comprehensionPassed:false,completed:false},{merge:true});
 }
 async function loadTasks(){
-  tasks=await fetch('./pilot-tasks-v2.json').then(r=>{if(!r.ok)throw new Error('Pilot tasks could not be loaded.');return r.json()});
+  tasks=await fetch('./pilot-tasks-v3.json').then(r=>{if(!r.ok)throw new Error('Pilot tasks could not be loaded.');return r.json()});
   if(tasks.length!==PILOT_ITEMS)throw new Error('Pilot task set is incomplete.');
   const saved=await getDocs(collection(db,'studies',PILOT_STUDY_ID,'participants',user.uid,'responses'));answers=Object.fromEntries(saved.docs.map(x=>[x.id,x.data()]));index=Math.max(0,tasks.findIndex(t=>!answers[t.taskId]));if(index<0)index=0;
 }
