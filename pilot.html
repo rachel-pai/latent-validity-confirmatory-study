@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Memory Decision Study</title><link rel="stylesheet" href="styles.css"></head>
+<body><main class="wrap">
+  <div class="top"><div class="brand">Memory Decision Study — Cognitive Pilot</div><div class="pill" id="statusPill">Pilot</div></div>
+
+  <section id="setup" class="card">
+    <h1>When may an assistant use something it remembers?</h1>
+    <p>You will read 12 short situations. For each one, judge whether a highlighted remembered detail may be used in the reply. The pilot normally takes 12–18 minutes.</p>
+    <div class="notice"><strong>Privacy:</strong> your Prolific ID is used only to prevent duplicate submissions and process study participation. Do not enter your name, email, or other personal information in rationales.</div>
+    <h3>Participant ID</h3><input id="participantId" type="text" autocomplete="off" placeholder="Loaded automatically from Prolific">
+    <p class="consent"><input id="consent" type="checkbox"><label for="consent">I am at least 18, have read the study information, and consent to participate. I understand that I may stop before submitting.</label></p>
+    <button id="startSetup">Continue to instructions</button><p id="setupError" class="error"></p>
+  </section>
+
+  <section id="instructions" class="card hidden">
+    <h2>Your main judgment</h2>
+    <ul>
+      <li><strong>Yes:</strong> the remembered detail may be used here.</li>
+      <li><strong>No:</strong> the remembered detail should not be used here.</li>
+      <li><strong>Not determined:</strong> the visible information is insufficient to decide.</li>
+    </ul>
+    <p>Judge only from the visible situation. Truth and relevance are separate questions: a detail can be true and relevant but still inappropriate to use.</p>
+    <h2>Practice</h2>
+    <div class="practice"><strong>Example</strong><p>A verified booking says Room 7. The meeting organizer asks for the room number, and the booking notice says organizers may use it for scheduling.</p><details><summary>Show explanation</summary><p><strong>Yes.</strong> The detail is current, relevant, and permitted for this person and purpose.</p></details></div>
+    <div class="practice"><strong>Example</strong><p>A current payroll note is requested by the assigned analyst, but the request says it will be used to rank promotion candidates. The notice permits its use only to correct payroll.</p><details><summary>Show explanation</summary><p><strong>No.</strong> Its truth does not make the proposed use appropriate.</p></details></div>
+    <div class="practice"><strong>Example</strong><p>A request is signed Alex Kim, but the visible records contain two people with that name and do not identify which one sent it.</p><details><summary>Show explanation</summary><p><strong>Not determined.</strong> More information is needed to resolve the person.</p></details></div>
+    <button id="toQuiz">Continue to comprehension check</button>
+  </section>
+
+  <section id="quiz" class="card hidden">
+    <h2>Comprehension check</h2><p>All three answers must be correct. You may review the instructions and try again.</p>
+    <div id="quizQuestions"></div><button id="submitQuiz">Check answers</button><p id="quizError" class="error"></p>
+  </section>
+
+  <section id="study" class="hidden">
+    <div class="card"><div class="progress"><div id="progressBar"></div></div><p id="progressText" class="small muted"></p></div>
+    <article class="card">
+      <p class="pill" id="caseMeta"></p><h2 id="caseTitle"></h2>
+      <div class="fact"><strong>Request</strong><span id="request"></span></div>
+      <div class="fact"><strong>Relevant history</strong><span id="history"></span></div>
+      <div class="fact"><strong>Decision context</strong><span id="context"></span></div>
+      <div class="grid"><div class="fact"><strong>Highlighted remembered detail</strong><span id="noteA"></span></div><div class="fact"><strong>Additional visible record</strong><span id="noteB"></span></div></div>
+      <form id="responseForm">
+        <h3>1. May the assistant use the highlighted remembered detail here?</h3><div id="actionOptions"></div>
+        <h3>2. Is the remembered detail currently true?</h3><div id="memoryOptions"></div>
+        <h3>3. Is the detail relevant to the request?</h3><div id="relevanceOptions"></div>
+        <h3>4. What should the assistant do in its response?</h3><div id="dispositionOptions"></div>
+        <h3>5. What was decisive?</h3><div id="reasonOptions"></div>
+        <h3>6. Confidence</h3><div class="confidence" id="confidenceOptions"></div>
+        <h3>7. Optional comment</h3><textarea name="rationale" maxlength="600" placeholder="If anything was difficult, explain briefly. Do not enter personal information."></textarea>
+        <h3>8. Was the case clear enough to decide?</h3>
+        <label class="option"><input type="radio" name="task_clear_yes_no" value="yes">Yes</label><label class="option"><input type="radio" name="task_clear_yes_no" value="no">No</label>
+        <div id="unclearBox" class="hidden"><label for="unclear">What was unclear?</label><textarea id="unclear" name="unclear_reason" maxlength="400"></textarea></div>
+        <p id="formError" class="error"></p><div class="actions"><button type="button" class="secondary" id="previous">Previous</button><button type="submit" id="saveNext">Save and continue</button></div>
+      </form>
+    </article>
+  </section>
+
+  <section id="done" class="card hidden"><h1>Thank you</h1><p>Your 12 pilot responses were saved.</p><p id="doneError" class="error"></p></section>
+  <p class="footer">Study data are saved securely under an isolated study identifier.</p>
+</main>
+
+<script type="module">
+import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+import {getAuth,signInAnonymously} from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+import {getFirestore,doc,getDoc,setDoc,updateDoc,collection,query,where,limit,getDocs,runTransaction,serverTimestamp,orderBy} from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+import {firebaseConfig,studyConfig} from './firebase-config.js';
+
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
+const params=new URLSearchParams(location.search),prolificId=params.get('PROLIFIC_PID')||'',studyIdParam=params.get('STUDY_ID')||'',sessionId=params.get('SESSION_ID')||'';
+const PILOT_STUDY_ID='lv-confirmatory-cognitive-pilot-20260722',PILOT_ITEMS=12;
+$('participantId').value=prolificId; let user,tasks=[],answers={},index=0,itemStarted=0,slotId='';
+const ACTIONS={yes:'Yes, it may be used',no:'No, it should not be used',unresolved:'The visible information does not determine this'};
+const MEMORIES={current:'Current',historical:'No longer current',unresolved:'Cannot tell'};
+const RELEVANCE={relevant:'Relevant',irrelevant:'Not relevant',unresolved:'Cannot tell'};
+const DISPOSITIONS={give_detail:'Give the requested detail',limited:'Give only a limited version',without_detail:'Answer without relying on that detail',decline:'Decline this request',seek_information:'Ask for or wait for missing information'};
+const REASONS={requester:'Who is asking',purpose:'Why it will be used',revision:'A later update',lifecycle:'Whether permission remains active',provenance:'Source support',reference:'Which person or case is meant',other:'Other visible fact'};
+const QUIZ=[['q1','A detail is true and relevant, but the stated purpose is outside the permission shown.','no'],['q2','The records do not establish which of two people with the same name made the request.','unresolved'],['q3','A current detail is requested by the permitted person for the permitted purpose.','yes']];
+
+function show(id){['setup','instructions','quiz','study','done'].forEach(x=>$(x).classList.toggle('hidden',x!==id))}
+function option(name,value,label){return `<label class="option"><input type="radio" name="${name}" value="${value}">${label}</label>`}
+$('actionOptions').innerHTML=Object.entries(ACTIONS).map(([v,l])=>option('final_action',v,l)).join('');
+$('memoryOptions').innerHTML=Object.entries(MEMORIES).map(([v,l])=>option('current_truth',v,l)).join('');
+$('relevanceOptions').innerHTML=Object.entries(RELEVANCE).map(([v,l])=>option('relevance',v,l)).join('');
+$('dispositionOptions').innerHTML=Object.entries(DISPOSITIONS).map(([v,l])=>option('response_disposition',v,l)).join('');
+$('reasonOptions').innerHTML=Object.entries(REASONS).map(([v,l])=>option('decisive_reason',v,l)).join('');
+$('confidenceOptions').innerHTML=[1,2,3,4,5].map(v=>`<label class="option"><input type="radio" name="confidence" value="${v}">${v}</label>`).join('');
+$('quizQuestions').innerHTML=QUIZ.map(([n,text])=>`<h3>${text}</h3>${Object.entries(ACTIONS).map(([v])=>option(n,v,v[0].toUpperCase()+v.slice(1))).join('')}`).join('');
+
+async function ensureAuth(){if(user)return user;const result=await signInAnonymously(auth);user=result.user;return user}
+async function claimSlot(){
+  slotId='PILOT';const pref=doc(db,'studies',PILOT_STUDY_ID,'participants',user.uid);
+  await setDoc(pref,{uid:user.uid,slotId,prolificId:$('participantId').value.trim(),prolificStudyId:studyIdParam,prolificSessionId:sessionId,studyId:PILOT_STUDY_ID,interfaceVersion:'lv-cognitive-pilot-v1',consented:true,consentedAt:serverTimestamp(),comprehensionPassed:false,completed:false},{merge:true});
+}
+async function loadTasks(){
+  tasks=await fetch('./pilot-tasks.json').then(r=>{if(!r.ok)throw new Error('Pilot tasks could not be loaded.');return r.json()});
+  if(tasks.length!==PILOT_ITEMS)throw new Error('Pilot task set is incomplete.');
+  const saved=await getDocs(collection(db,'studies',PILOT_STUDY_ID,'participants',user.uid,'responses'));answers=Object.fromEntries(saved.docs.map(x=>[x.id,x.data()]));index=Math.max(0,tasks.findIndex(t=>!answers[t.taskId]));if(index<0)index=0;
+}
+
+$('startSetup').onclick=async()=>{try{$('setupError').textContent='';if(!$('consent').checked)throw new Error('Please confirm consent before continuing.');if(!$('participantId').value.trim())throw new Error('A Prolific participant ID is required.');await ensureAuth();await claimSlot();show('instructions')}catch(e){$('setupError').textContent=e.message}}
+$('toQuiz').onclick=()=>show('quiz');
+$('submitQuiz').onclick=async()=>{const wrong=QUIZ.filter(([n,,gold])=>document.querySelector(`[name=${n}]:checked`)?.value!==gold);if(wrong.length){$('quizError').textContent='Review the examples and answer all three questions correctly.';return}try{$('quizError').textContent='';await updateDoc(doc(db,'studies',PILOT_STUDY_ID,'participants',user.uid),{comprehensionPassed:true,comprehensionScore:3,comprehensionPassedAt:serverTimestamp()});await loadTasks();show('study');render()}catch(e){$('quizError').textContent=e.message}}
+
+function render(){const t=tasks[index];itemStarted=Date.now();$('progressText').textContent=`${Object.keys(answers).length} / ${tasks.length} saved · item ${index+1}`;$('progressBar').style.width=`${100*Object.keys(answers).length/tasks.length}%`;$('caseMeta').textContent=t.taskId;$('caseTitle').textContent=t.title;$('request').textContent=t.request;$('history').textContent=t.relevantHistory;$('context').textContent=t.decisionContext;$('noteA').textContent=t.storedNoteA;$('noteB').textContent=t.storedNoteB;$('responseForm').reset();$('unclearBox').classList.add('hidden');const a=answers[t.taskId];if(a)for(const [k,v] of Object.entries(a)){const el=document.querySelector(`[name="${k}"][value="${CSS.escape(String(v))}"]`)||document.querySelector(`[name="${k}"]`);if(el)el.type==='radio'?el.checked=true:el.value=v}$('previous').disabled=index===0;$('formError').textContent='';scrollTo(0,0)}
+document.querySelectorAll('[name=task_clear_yes_no]').forEach(x=>x.onchange=()=>$('unclearBox').classList.toggle('hidden',x.value!=='no'||!x.checked));
+$('previous').onclick=()=>{if(index>0){index--;render()}};
+
+$('responseForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.currentTarget),a=Object.fromEntries(fd.entries()),errors=[];
+  if(!ACTIONS[a.final_action])errors.push('Answer question 1.');if(!MEMORIES[a.current_truth])errors.push('Answer question 2.');
+  if(!RELEVANCE[a.relevance])errors.push('Answer question 3.');if(!DISPOSITIONS[a.response_disposition])errors.push('Answer question 4.');if(!REASONS[a.decisive_reason])errors.push('Answer question 5.');
+  if(!a.confidence)errors.push('Select confidence.');if(!a.task_clear_yes_no)errors.push('Say whether the case was clear.');if(a.task_clear_yes_no==='no'&&(a.unclear_reason||'').trim().length<10)errors.push('Explain what was unclear.');
+  if(errors.length){$('formError').textContent=errors.join(' ');return}const t=tasks[index],payload={...a,taskId:t.taskId,uid:user.uid,slotId,studyId:PILOT_STUDY_ID,interfaceVersion:'lv-cognitive-pilot-v1',timeSpentSeconds:Math.round((Date.now()-itemStarted)/1000),savedAt:new Date().toISOString(),serverSavedAt:serverTimestamp()};
+  try{$('saveNext').disabled=true;await setDoc(doc(db,'studies',PILOT_STUDY_ID,'participants',user.uid,'responses',t.taskId),payload);answers[t.taskId]=payload;if(Object.keys(answers).length===tasks.length){await updateDoc(doc(db,'studies',PILOT_STUDY_ID,'participants',user.uid),{completed:true,responseCount:tasks.length,completedAt:serverTimestamp()});show('done');return}index=tasks.findIndex((x,i)=>i>index&&!answers[x.taskId]);if(index<0)index=tasks.findIndex(x=>!answers[x.taskId]);render()}catch(err){$('formError').textContent='Could not save securely: '+err.message}finally{$('saveNext').disabled=false}}
+</script></body></html>
