@@ -33,7 +33,8 @@ service cloud.firestore {
       match /participants/{uid} {
         allow create: if signedIn() && request.auth.uid == uid
           && request.resource.data.uid == uid;
-        allow read, update: if signedIn() && request.auth.uid == uid
+        allow read: if signedIn() && request.auth.uid == uid;
+        allow update: if signedIn() && request.auth.uid == uid
           && request.resource.data.uid == uid;
         allow delete: if false;
 
@@ -43,6 +44,50 @@ service cloud.firestore {
             && request.resource.data.uid == uid
             && request.resource.data.taskId == taskId
             && request.resource.data.studyId == 'lv-confirmatory-v1-20260722';
+          allow delete: if false;
+        }
+      }
+    }
+
+    match /studies/{pilotStudyId} {
+      allow read: if signedIn()
+        && pilotStudyId in [
+          'lv-confirmatory-cognitive-pilot-20260722',
+          'lv-confirmatory-cognitive-pilot-v2-20260722'
+        ];
+      allow write: if false;
+
+      match /participants/{uid} {
+        allow create: if signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && request.resource.data.studyId == pilotStudyId
+          && pilotStudyId in [
+            'lv-confirmatory-cognitive-pilot-20260722',
+            'lv-confirmatory-cognitive-pilot-v2-20260722'
+          ];
+        allow read: if signedIn() && request.auth.uid == uid;
+        allow update: if signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.uid == uid
+          && request.resource.data.studyId == pilotStudyId
+          && pilotStudyId in [
+            'lv-confirmatory-cognitive-pilot-20260722',
+            'lv-confirmatory-cognitive-pilot-v2-20260722'
+          ];
+        allow delete: if false;
+
+        match /responses/{taskId} {
+          allow read: if signedIn() && request.auth.uid == uid;
+          allow create, update: if signedIn()
+            && request.auth.uid == uid
+            && request.resource.data.uid == uid
+            && request.resource.data.taskId == taskId
+            && request.resource.data.studyId == pilotStudyId
+            && pilotStudyId in [
+              'lv-confirmatory-cognitive-pilot-20260722',
+              'lv-confirmatory-cognitive-pilot-v2-20260722'
+            ];
           allow delete: if false;
         }
       }
