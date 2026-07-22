@@ -1,0 +1,42 @@
+.wrap {
+  max-width: 1440px;
+}
+
+.study-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, .9fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.case-panel {
+  position: sticky;
+  top: 18px;
+}
+
+.answer-panel {
+  border-left: 1px solid #dce3ef;
+  padding-left: 28px;
+}
+
+.scale-help {
+  color: #596579;
+  font-size: .9rem;
+  margin: -3px 0 10px;
+}
+
+@media (max-width: 900px) {
+  .wrap { max-width: 920px; }
+  .study-layout { display: block; }
+  .case-panel { position: static; }
+  .answer-panel {
+    border-left: 0;
+    padding-left: 0;
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: 650px) {
+  .confidence { gap: 4px; }
+  .confidence .option { padding: 10px 5px; }
+}

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Memory Decision Study</title><link rel="stylesheet" href="styles.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Memory Decision Study</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="study-layout.css"></head>
 <body><main class="wrap">
   <div class="top"><div class="brand">Memory Decision Study</div><div class="pill" id="statusPill">Secure study</div></div>
 
@@ -35,19 +35,19 @@
 
   <section id="study" class="hidden">
     <div class="card"><div class="progress"><div id="progressBar"></div></div><p id="progressText" class="small muted"></p></div>
-    <article class="card">
-      <p class="pill" id="caseMeta"></p><h2 id="caseTitle"></h2>
+    <article class="card study-layout">
+      <div class="case-panel"><p class="pill" id="caseMeta"></p><h2 id="caseTitle"></h2>
       <div class="fact"><strong>Request</strong><span id="request"></span></div>
       <div class="fact"><strong>Relevant history</strong><span id="history"></span></div>
       <div class="fact"><strong>Decision context</strong><span id="context"></span></div>
-      <div class="grid"><div class="fact"><strong>Highlighted remembered detail</strong><span id="noteA"></span></div><div class="fact"><strong>Additional visible record</strong><span id="noteB"></span></div></div>
-      <form id="responseForm">
+      <div class="grid"><div class="fact"><strong>Highlighted remembered detail</strong><span id="noteA"></span></div><div class="fact"><strong>Additional visible record</strong><span id="noteB"></span></div></div></div>
+      <form id="responseForm" class="answer-panel">
         <h3>1. May the assistant use the highlighted remembered detail here?</h3><div id="actionOptions"></div>
         <h3>2. Is the remembered detail currently true?</h3><div id="memoryOptions"></div>
         <h3>3. Is the detail relevant to the request?</h3><div id="relevanceOptions"></div>
         <h3>4. What should the assistant do in its response?</h3><div id="dispositionOptions"></div>
         <h3>5. What was decisive?</h3><div id="reasonOptions"></div>
-        <h3>6. Confidence</h3><div class="confidence" id="confidenceOptions"></div>
+        <h3>6. How confident are you in your decisions above?</h3><p class="scale-help"><strong>1 = not at all confident</strong>; <strong>5 = completely confident</strong>. Use the middle values for intermediate confidence.</p><div class="confidence" id="confidenceOptions"></div>
         <h3>7. Optional comment</h3><textarea name="rationale" maxlength="600" placeholder="If anything was difficult, explain briefly. Do not enter personal information."></textarea>
         <h3>8. Was the case clear enough to decide?</h3>
         <label class="option"><input type="radio" name="task_clear_yes_no" value="yes">Yes</label><label class="option"><input type="radio" name="task_clear_yes_no" value="no">No</label>
